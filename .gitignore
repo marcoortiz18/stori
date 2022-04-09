@@ -1,0 +1,7 @@
+### VS Code ###
+.vscode/
+
+### PyCache ###
+pipeline/__pycache__
+
+
