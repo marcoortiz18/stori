@@ -1,11 +1,8 @@
 import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
 
-from datetime import datetime
 from Connector import Connector
 from FileProcessor import FileProcessor
-
+from Redshift import Redshift
 class Mongo:
     
     def start(self):
@@ -13,9 +10,11 @@ class Mongo:
         mongo = Mongo()
 
         try:
-            # This should be in secrets, but for this app I leave it hard coded
-            host = "mongodb+srv://stori_mongo:Stori_123@cluster0.stwqn.mongodb.net/test"
-            database = "stori"
+            
+            # Get all the secrets keys
+            secret = Connector.get_secrets("dev/stori/mongo")
+            host = secret['host']
+            database = secret['dbname']
 
             # Connect with the database
             connector = Connector(host, database, None, None)
@@ -30,6 +29,10 @@ class Mongo:
             file_name = FileProcessor.generate_filename("mongo_")
             source_file_path = FileProcessor.save_to_file(data, file_name)
             FileProcessor.save_to_s3(source_file_path, file_name)
+
+            # Copy parquet file to resdhift
+            Redshift.copy_to_redshift(file_name)
+
         except:
             response = False
 

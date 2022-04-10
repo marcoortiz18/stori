@@ -1,9 +1,8 @@
 import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
 
 from Connector import Connector
 from FileProcessor import FileProcessor
+from Redshift import Redshift
 
 class Postgres:
     
@@ -12,11 +11,13 @@ class Postgres:
         postgres = Postgres()
         
         try:
-            # This should be in secrets, but for this app I leave it hard coded
-            host = "stori.ct6otmz7rrfi.us-east-1.rds.amazonaws.com"
-            database = "stori_db"
-            password = "Stori_123"
-            user = "stori_user"
+
+            # Get all the secrets keys
+            secret = Connector.get_secrets("dev/stori/pg")
+            host = secret['host']
+            database = secret['dbname']
+            password = secret['password']
+            user = secret['username']
             query = 'select * from stori.account order by 1'
 
             # Connect with the database
@@ -31,6 +32,10 @@ class Postgres:
             file_name = FileProcessor.generate_filename("pg_")
             source_file_path = FileProcessor.save_to_file(data, file_name)
             FileProcessor.save_to_s3(source_file_path, file_name)
+
+            # Copy parquet file to resdhift
+            Redshift.copy_to_redshift(file_name)
+        
         except:
             response = False
 

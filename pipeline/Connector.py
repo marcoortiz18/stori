@@ -1,7 +1,8 @@
 import psycopg2
-import pandas as pd
 from pymongo import MongoClient
-import psycopg2
+import boto3
+import json
+
 
 class Connector:
 
@@ -20,15 +21,12 @@ class Connector:
         return connection
 
     def connect_to_pg(self):
-        
-        db_opts = {
-            'user': self.user,
-            'password': self.password,
-            'host': self.host,
-            'database': self.database
-        }
-
-        connection = psycopg2.connect(**db_opts)
+        connection = psycopg2.connect(
+            user=self.user,
+            password=self.password,
+            host=self.host,
+            database=self.database
+        )
         
         return connection
 
@@ -44,3 +42,13 @@ class Connector:
         connection = psycopg2.connect(**db_opts)
         
         return connection
+
+    def get_secrets(project):
+        client = boto3.client("secretsmanager")
+        pg_keys = client.get_secret_value(
+            SecretId =project
+        )
+
+        secret = json.loads(pg_keys['SecretString'])
+
+        return secret

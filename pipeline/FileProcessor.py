@@ -4,6 +4,7 @@ import pyarrow.parquet as pq
 import datetime
 import os
 
+from Connector import Connector
 class FileProcessor:
     
     def save_to_file(dataframe, file_name):
@@ -18,13 +19,16 @@ class FileProcessor:
         return path
 
     def save_to_s3(source_file_path, file_name):
-        AWS_ACCESS_KEY_ID = 'AKIA6N2KWCM3XLAJNQVG'
-        AWS_SECRETE_KEY_ID = '2GSiMeg/MgZysH8FatmtHOV5wfRqMvhc2sML20uF'
+        
+        secret = Connector.get_secrets("dev/stori/s3")
+        AWS_ACCESS_KEY_ID = secret['AWS_ACCESS_KEY_ID']
+        AWS_SECRETE_KEY_ID = secret['AWS_SECRETE_KEY_ID']
+
 
         s3 = boto3.resource('s3', aws_access_key_id = AWS_ACCESS_KEY_ID, aws_secret_access_key = AWS_SECRETE_KEY_ID)
         s3.Object('stori-bucket', file_name).put(Body=open(source_file_path, 'rb'))
-
-        #FileProcessor.delete_file(source_file_path)
+        # Delete the local file
+        FileProcessor.delete_file(source_file_path)
 
     def generate_filename(file_name):
         date = datetime.datetime.now()
