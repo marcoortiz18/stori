@@ -30,6 +30,12 @@ MongoDB
 
 ![](assets/mongo_collections.png)
 
+Redshift Cluster
+
+![](assets/redshift-cluster.png)
+
+![](assets/redshift-db.png)
+
 ## Instructions
 
 For the right way to run the application we need python i use the following version
